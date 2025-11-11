@@ -1,0 +1,37 @@
+- id: binance
+  name: Binance Futures (demo)
+  type: rest
+  base_url: https://fapi.binance.com
+  auth:
+    type: none
+  rate_limit:
+    requests_per_minute: 1200
+  retry_policy:
+    max_retries: 5
+    backoff_ms: [500, 1000, 2000, 4000, 8000]
+  endpoints:
+    candles:
+      path: /fapi/v1/continuousKlines
+      params:
+        pair: str
+        contractType: PERPETUAL
+        interval: 1m
+        startTime: int
+        endTime: int
+        limit: 1000
+      defaults:
+        contractType: PERPETUAL
+        interval: 1m
+      limit: 1000
+      mapping:
+        open_time_ms: 0
+        open: 1
+        high: 2
+        low: 3
+        close: 4
+        volume: 5
+        close_time_ms: 6
+        quote_volume: 7
+        trades: 8
+        taker_buy_volume: 9
+        taker_buy_quote: 10

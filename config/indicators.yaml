@@ -1,0 +1,8 @@
+- name: SMA_60
+  window_sec: 60
+  expression: SMA(close, 60)
+  inputs: [close]
+- name: EMA_300
+  window_sec: 300
+  expression: EMA(close, 300)
+  inputs: [close]
