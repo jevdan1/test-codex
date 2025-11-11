@@ -27,6 +27,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.busy.busy_changed.connect(self._on_busy_changed)
         self._build_ui()
         self._populate_sources()
+        self._populate_pairs()
 
     def _build_ui(self) -> None:
         self.setWindowTitle("Crypto Data Collector")
@@ -156,6 +157,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.source_combo.addItem(source.name, source_id)
         if self.source_combo.count():
             self.source_combo.setCurrentIndex(0)
+        sources_path = self.paths.config_dir / "sources.yaml"
+        self.source_combo.setToolTip(f"Edit sources by modifying: {sources_path}")
+
+    def _populate_pairs(self) -> None:
+        self.pair_combo.clear()
+        if not self.config.pair_shortlist:
+            self.pair_combo.setPlaceholderText("Enter pair symbol, e.g. BTCUSDT")
+            return
+        for pair in self.config.pair_shortlist:
+            self.pair_combo.addItem(pair)
+        self.pair_combo.setCurrentIndex(0)
+        pairs_path = self.paths.config_dir / "pipelines.yaml"
+        self.pair_combo.setToolTip(f"Pair shortlist comes from: {pairs_path}")
 
     def _choose_library(self) -> None:
         directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Select library", str(self.paths.library_dir))
@@ -163,7 +177,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.library_path_edit.setText(directory)
 
     def _edit_pairs(self) -> None:
-        QtWidgets.QMessageBox.information(self, "Pairs", "Pair shortlist editing is not yet implemented.")
+        config_path = self.paths.config_dir / "pipelines.yaml"
+        message = (
+            "Pairs are configured via YAML.\n\n"
+            f"Update the shortlist in:\n{config_path}"
+        )
+        QtWidgets.QMessageBox.information(self, "Pairs", message)
 
     def _open_path(self, path: Path) -> None:
         QtGui = QtWidgets.QDesktopWidget  # type: ignore[attr-defined]

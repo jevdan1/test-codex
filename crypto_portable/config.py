@@ -49,6 +49,7 @@ class IndicatorDefinition:
 class ConfigBundle:
     sources: Dict[str, SourceDefinition]
     pipelines: List[PipelineDefinition]
+    pair_shortlist: List[str]
     indicators: List[IndicatorDefinition]
 
 
@@ -84,17 +85,39 @@ def _parse_sources(config: Iterable[Dict[str, Any]]) -> Dict[str, SourceDefiniti
     return sources
 
 
-def _parse_pipelines(config: Iterable[Dict[str, Any]]) -> List[PipelineDefinition]:
+def _parse_pipelines(config: Any) -> tuple[List[PipelineDefinition], List[str]]:
     pipelines: List[PipelineDefinition] = []
-    for entry in config:
-        pipelines.append(
-            PipelineDefinition(
-                source_id=entry["source_id"],
-                pair=entry["pair"],
-                granularity=str(entry.get("granularity", "1s")),
+    shortlist: List[str] = []
+
+    if isinstance(config, dict):
+        raw_shortlist = config.get("shortlist", [])
+        shortlist = [str(item) for item in raw_shortlist]
+        pipelines_block = config.get("pipelines", {})
+        for _, entry in pipelines_block.items():
+            source_id = entry.get("source")
+            granularity = str(entry.get("granularity", "1s"))
+            for pair in entry.get("pairs", []):
+                pipelines.append(
+                    PipelineDefinition(
+                        source_id=str(source_id),
+                        pair=str(pair),
+                        granularity=granularity,
+                    )
+                )
+    else:
+        for entry in config or []:
+            pipelines.append(
+                PipelineDefinition(
+                    source_id=entry["source_id"],
+                    pair=entry["pair"],
+                    granularity=str(entry.get("granularity", "1s")),
+                )
             )
-        )
-    return pipelines
+
+    if not shortlist:
+        shortlist = sorted({pipeline.pair for pipeline in pipelines})
+
+    return pipelines, shortlist
 
 
 def _parse_indicators(config: Iterable[Dict[str, Any]]) -> List[IndicatorDefinition]:
@@ -120,9 +143,12 @@ def load_config_bundle(config_dir: Path) -> ConfigBundle:
     pipelines_data = _load_yaml(pipelines_path) if pipelines_path.exists() else []
     indicators_data = _load_yaml(indicators_path) if indicators_path.exists() else []
 
+    pipelines, shortlist = _parse_pipelines(pipelines_data or [])
+
     return ConfigBundle(
         sources=_parse_sources(sources_data or []),
-        pipelines=_parse_pipelines(pipelines_data or []),
+        pipelines=pipelines,
+        pair_shortlist=shortlist,
         indicators=_parse_indicators(indicators_data or []),
     )
 

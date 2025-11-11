@@ -55,7 +55,18 @@ class ChartViewerDialog(QtWidgets.QDialog):
         self.export_csv_button = QtWidgets.QPushButton("Export CSV")
         self.export_png_button = QtWidgets.QPushButton("Export image")
 
+        sources_path = self.paths.config_dir / "sources.yaml"
+        source_names = list(self.config.sources.values())
+        if source_names:
+            self.source_label.setText(source_names[0].name)
+        self.source_label.setToolTip(f"Edit sources in: {sources_path}")
         left_layout.addRow("Source", self.source_label)
+        for pair in self.config.pair_shortlist:
+            item = QtWidgets.QListWidgetItem(pair)
+            item.setCheckState(QtCore.Qt.Unchecked)
+            self.pairs_list.addItem(item)
+        pairs_path = self.paths.config_dir / "pipelines.yaml"
+        self.pairs_list.setToolTip(f"Pairs shortlist is defined in: {pairs_path}")
         left_layout.addRow("Pairs", self.pairs_list)
         left_layout.addRow("Add pair", self.add_pair_button)
         left_layout.addRow("From", self.from_edit)
