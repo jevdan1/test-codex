@@ -1,0 +1,3 @@
+- source_id: binance
+  pair: BTCUSDT
+  granularity: 1s
