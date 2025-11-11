@@ -2,6 +2,13 @@
 chcp 65001 >nul
 setlocal ENABLEDELAYEDEXPANSION
 
+rem Optional interactive pausing (set PORTABLE_INTERACTIVE=1 to require keypresses)
+set PORTABLE_INTERACTIVE=%PORTABLE_INTERACTIVE%
+if /I "%PORTABLE_INTERACTIVE%"=="true" set PORTABLE_INTERACTIVE=1
+if /I "%PORTABLE_INTERACTIVE%"=="yes" set PORTABLE_INTERACTIVE=1
+if /I "%PORTABLE_INTERACTIVE%"=="on" set PORTABLE_INTERACTIVE=1
+if not "%PORTABLE_INTERACTIVE%"=="1" set PORTABLE_INTERACTIVE=0
+
 rem ========== SETTINGS ==========
 set APP_PKG=crypto_portable
 set APP_ENTRY=%APP_PKG%.app
@@ -140,8 +147,12 @@ if %EXITCODE% NEQ 0 (
 ) else (
   echo GUI closed normally.
 )
-echo All steps finished. Press any key to close...
-pause >nul
+if "%PORTABLE_INTERACTIVE%"=="1" (
+  echo All steps finished. Press any key to close...
+  pause >nul
+) else (
+  echo All steps finished.
+)
 exit /b 0
 
 rem ========== helpers ==========
@@ -152,8 +163,12 @@ echo -----------------------------------------------
 exit /b 0
 
 :cont
-echo   Step OK. Press any key to continue...
-pause >nul
+if "%PORTABLE_INTERACTIVE%"=="1" (
+  echo   Step OK. Press any key to continue...
+  pause >nul
+) else (
+  echo   Step OK.
+)
 exit /b 0
 
 :fallback_tree
@@ -167,7 +182,9 @@ if errorlevel 1 (
 exit /b 0
 
 :fail
-echo.
-echo Press any key to close...
-pause >nul
+if "%PORTABLE_INTERACTIVE%"=="1" (
+  echo.
+  echo Press any key to close...
+  pause >nul
+)
 exit /b 1
