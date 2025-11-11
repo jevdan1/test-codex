@@ -1,0 +1,15 @@
+build/
+dist/
+*.zip
+*.tar.gz
+*.7z
+*.exe
+.venv/
+venv/
+__pycache__/
+*.pyc
+library/
+exports/
+logs/
+.vscode/
+.idea/
